@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 const App = () => {
-  const [lineWidth, setLineWidth] = useState(5);
+  const [lineWidth, setLineWidth] = useState(2);
   const canvasRef = useRef(null);
 
   let canvas, ctx, flag = false,
@@ -127,47 +127,20 @@ const App = () => {
     <div>
       <canvas ref={canvasRef} id="can" style={{ position: 'absolute', top: '1%', left: '1%', border: '2px solid' }}></canvas>
       <div style={{ position: 'absolute', top: '2%', left: '85%' }}>Choose Color</div>
-      <div
-        style={{ position: 'absolute', top: '5%', left: '87%', width: '15px', height: '15px', background: 'green', border: '2px solid' }}
-        id="green"
-        onClick={() => color(document.getElementById('green'))}
-      ></div>
-      <div
-        style={{ position: 'absolute', top: '5%', left: '90%', width: '15px', height: '15px', background: 'blue', border: '2px solid' }}
-        id="blue"
-        onClick={() => color(document.getElementById('blue'))}
-      ></div>
-      <div
-        style={{ position: 'absolute', top: '5%', left: '93%', width: '15px', height: '15px', background: 'red', border: '2px solid' }}
-        id="red"
-        onClick={() => color(document.getElementById('red'))}
-      ></div>
-      <div
-        style={{ position: 'absolute', top: '8%', left: '87%', width: '15px', height: '15px', background: 'yellow', border: '2px solid' }}
-        id="yellow"
-        onClick={() => color(document.getElementById('yellow'))}
-      ></div>
-      <div
-        style={{ position: 'absolute', top: '8%', left: '90%', width: '15px', height: '15px', background: 'orange', border: '2px solid' }}
-        id="orange"
-        onClick={() => color(document.getElementById('orange'))}
-      ></div>
-      <div
-        style={{ position: 'absolute', top: '8%', left: '93%', width: '15px', height: '15px', background: 'black', border: '2px solid' }}
-        id="black"
-        onClick={() => color(document.getElementById('black'))}
-      ></div>
+      <div style={{ position: 'absolute', top: '5%', left: '87%', width: '15px', height: '15px', background: 'green', border: '2px solid' }} id="green" onClick={() => color(document.getElementById('green'))} ></div>
+      <div style={{ position: 'absolute', top: '5%', left: '90%', width: '15px', height: '15px', background: 'blue', border: '2px solid' }} id="blue" onClick={() => color(document.getElementById('blue'))} ></div>
+      <div style={{ position: 'absolute', top: '5%', left: '93%', width: '15px', height: '15px', background: 'red', border: '2px solid' }} id="red" onClick={() => color(document.getElementById('red'))} ></div>
+      <div style={{ position: 'absolute', top: '8%', left: '87%', width: '15px', height: '15px', background: 'yellow', border: '2px solid' }} id="yellow" onClick={() => color(document.getElementById('yellow'))} ></div>
+      <div style={{ position: 'absolute', top: '8%', left: '90%', width: '15px', height: '15px', background: 'orange', border: '2px solid' }} id="orange" onClick={() => color(document.getElementById('orange'))} ></div>
+      <div style={{ position: 'absolute', top: '8%', left: '93%', width: '15px', height: '15px', background: 'black', border: '2px solid' }} id="black" onClick={() => color(document.getElementById('black'))} ></div>
       <div style={{ position: 'absolute', top: '11%', left: '85%' }}>Eraser</div>
-      <div
-        style={{ position: 'absolute', top: '14%', left: '87%', width: '15px', height: '15px', background: 'white', border: '2px solid', }}
-        id="white"
-        onClick={() => color(document.getElementById('white'))}
-      ></div>
+      <div style={{ position: 'absolute', top: '14%', left: '87%', width: '15px', height: '15px', background: 'white', border: '2px solid', }} id="white" onClick={() => color(document.getElementById('white'))} ></div>
       <input type="button" value="rectangle" onClick={drawRectangle} style={{ position: 'absolute', top: '18%', left: '85%' }}></input>
       <input type="button" value="clear" onClick={clearAll} style={{ position: 'absolute', top: '22%', left: '85%' }} />
-      <input type="range" min="0" max="20" value={lineWidth} onChange={(e) => { setLineWidth(e.target.value); }} style={{ position: 'absolute', top: '1%', left: '1%' }} id='lineWidthInput' />
+      <input type="range" min="0" max="20" value={lineWidth} onChange={(e) => { setLineWidth(e.target.value); }} style={{ position: 'absolute', top: '1%', left: '2%' }} id='lineWidthInput' />
     </div>
   );
 };
 
 export default App;
+   
