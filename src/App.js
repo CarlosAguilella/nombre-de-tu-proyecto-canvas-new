@@ -10,7 +10,6 @@ const App = () => {
     prevY = 0,
     currY = 0,
     dot_flag = false;
-
   let x = 'black',
     y = 2;
 
@@ -76,7 +75,6 @@ const App = () => {
   };
 
   const drawRectangle = () => {
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     ctx.beginPath();
     ctx.rect(prevX, prevY, currX, currY);
     ctx.strokeStyle = x;
@@ -159,15 +157,15 @@ const App = () => {
         id="black"
         onClick={() => color(document.getElementById('black'))}
       ></div>
-      <div style={{ position: 'absolute', top: '10%', left: '85%' }}>Eraser</div>
+      <div style={{ position: 'absolute', top: '11%', left: '85%' }}>Eraser</div>
       <div
-        style={{ position: 'absolute', top: '13%', left: '87%', width: '15px', height: '15px', background: 'white', border: '2px solid', }}
+        style={{ position: 'absolute', top: '14%', left: '87%', width: '15px', height: '15px', background: 'white', border: '2px solid', }}
         id="white"
         onClick={() => color(document.getElementById('white'))}
       ></div>
-      <input type="button" value="rectangle" onClick={drawRectangle} style={{ position: 'absolute', top: '16%', left: '85%' }}></input>
-      <input type="button" value="clear" onClick={clearAll} style={{ position: 'absolute', top: '19%', left: '85%' }} />
-      <input type="range" min="3" max="20" value={lineWidth} onChange={(e) => { setLineWidth(e.target.value); }} style={{ position: 'absolute', top: '22%', left: '85%' }} id='lineWidthInput' />
+      <input type="button" value="rectangle" onClick={drawRectangle} style={{ position: 'absolute', top: '18%', left: '85%' }}></input>
+      <input type="button" value="clear" onClick={clearAll} style={{ position: 'absolute', top: '22%', left: '85%' }} />
+      <input type="range" min="0" max="20" value={lineWidth} onChange={(e) => { setLineWidth(e.target.value); }} style={{ position: 'absolute', top: '1%', left: '1%' }} id='lineWidthInput' />
     </div>
   );
 };
