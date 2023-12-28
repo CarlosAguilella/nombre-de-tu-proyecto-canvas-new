@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 const App = () => {
-  const [lineWidth, setLineWidth] = useState(2);
+  const [lineWidth, setLineWidth] = useState(10);
   const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [isRectangling, setIsRectangling] = useState(false);
+  const [isCircling, setIsCircling] = useState(false);
 
   let canvas, ctx, flag = false,
     prevX = 0,
@@ -65,25 +68,47 @@ const App = () => {
   };
 
   const draw = () => {
-    ctx.beginPath();
-    ctx.moveTo(prevX, prevY);
-    ctx.lineTo(currX, currY);
-    ctx.strokeStyle = x;
-    ctx.lineWidth = lineWidth;
-    ctx.stroke();
-    ctx.closePath();
+      setIsDrawing(true);
+      ctx.beginPath();
+      ctx.moveTo(prevX, prevY);
+      ctx.lineTo(currX, currY);
+      ctx.strokeStyle = x;
+      ctx.lineWidth = lineWidth;
+      ctx.stroke();
+      ctx.closePath();
+      ctx.brushRadius = 12;
+      setIsCircling(false);
+      setIsRectangling(false);
   };
 
   const drawRectangle = () => {
-    ctx.beginPath();
-    ctx.rect(prevX, prevY, currX, currY);
-    ctx.strokeStyle = x;
-    ctx.lineWidth = y;
-    ctx.stroke();
-    ctx.closePath();
+      setIsRectangling(true);
+      ctx.beginPath();
+      ctx.rect(prevX, prevY, currX, currY);
+      ctx.strokeStyle = x;
+      ctx.lineWidth = y;
+      ctx.stroke();
+      ctx.closePath();
+      setIsDrawing(false);
+      setIsCircling(false);
+  }
+
+  const drawCircle = () => {
+      setIsCircling(true);
+      ctx.beginPath();
+      ctx.arc(prevX, prevY, currX/2, 0, 2 * Math.PI );
+      ctx.strokeStyle = x;
+      ctx.lineWidth = y;
+      ctx.stroke();
+      ctx.closePath();
+      setIsDrawing(false);
+      setIsRectangling(false);
   }
 
   const clearAll = () => {
+    setIsDrawing(false);
+    setIsRectangling(false);
+    setIsCircling(false);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
@@ -123,6 +148,12 @@ const App = () => {
     draw();
   };
 
+  const startDrawing = () => {
+    setIsDrawing(true);
+    setIsRectangling(false);
+    setIsCircling(false);
+  };
+
   return (
     <div>
       <canvas ref={canvasRef} id="can" style={{ position: 'absolute', top: '1%', left: '1%', border: '2px solid' }}></canvas>
@@ -135,12 +166,13 @@ const App = () => {
       <div style={{ position: 'absolute', top: '8%', left: '93%', width: '15px', height: '15px', background: 'black', border: '2px solid' }} id="black" onClick={() => color(document.getElementById('black'))} ></div>
       <div style={{ position: 'absolute', top: '11%', left: '85%' }}>Eraser</div>
       <div style={{ position: 'absolute', top: '14%', left: '87%', width: '15px', height: '15px', background: 'white', border: '2px solid', }} id="white" onClick={() => color(document.getElementById('white'))} ></div>
-      <input type="button" value="rectangle" onClick={drawRectangle} style={{ position: 'absolute', top: '18%', left: '85%' }}></input>
-      <input type="button" value="clear" onClick={clearAll} style={{ position: 'absolute', top: '22%', left: '85%' }} />
+      <input type="button" value="Draw" onClick={startDrawing} style={{ position: 'absolute', top: '18%', left: '85%' }}></input>      
+      <input type="button" value="Rectangle" onClick={drawRectangle} style={{ position: 'absolute', top: '21%', left: '85%' }}></input>
+      <input type="button" value="Circle" onClick={drawCircle} style={{ position: 'absolute', top: '24%', left: '85%' }}></input>
+      <input type="button" value="Clear" onClick={clearAll} style={{ position: 'absolute', top: '27%', left: '85%' }} />
       <input type="range" min="0" max="20" value={lineWidth} onChange={(e) => { setLineWidth(e.target.value); }} style={{ position: 'absolute', top: '1%', left: '2%' }} id='lineWidthInput' />
     </div>
   );
 };
 
 export default App;
-   
