@@ -20,7 +20,7 @@ const App = () => {
   const handleBrushSizeChange = (size) => {
     setBrushSize(size);
   };
-
+ wgsdhf
   const handleColorChange = (color) => {
     setStrokeColor(color);
   };
