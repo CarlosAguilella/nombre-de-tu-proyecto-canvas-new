@@ -1,176 +1,107 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 const App = () => {
-  const [lineWidth, setLineWidth] = useState(10);
   const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [isRectangling, setIsRectangling] = useState(false);
-  const [isCircling, setIsCircling] = useState(false);
+  const [canvasx, setCanvasX] = useState(0);
+  const [canvasy, setCanvasY] = useState(0);
+  const [lastMouseX, setLastMouseX] = useState(0);
+  const [lastMouseY, setLastMouseY] = useState(0);
+  const [mouseX, setMouseX] = useState(0);
+  const [mouseY, setMouseY] = useState(0);
+  const [mouseDown, setMouseDown] = useState(false);
+  const [toolType, setToolType] = useState('draw');
+  const [brushSize, setBrushSize] = useState(10);
+  const [strokeColor, setStrokeColor] = useState('#000000');
 
-  let canvas, ctx, flag = false,
-    prevX = 0,
-    currX = 0,
-    prevY = 0,
-    currY = 0,
-    dot_flag = false;
-  let x = 'black',
-    y = 2;
-
-  useEffect(() => {
-    init();
+  const handleUseTool = useCallback((tool) => {
+    setToolType(tool);
   }, []);
 
+  const handleBrushSizeChange = (size) => {
+    setBrushSize(size);
+  };
+
+  const handleColorChange = (color) => {
+    setStrokeColor(color);
+  };
+
   useEffect(() => {
-    const lineWidthInput = document.getElementById('lineWidthInput');
-    lineWidthInput.addEventListener('input', handleLineWidthChange);
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    setCanvasX(canvas.offsetLeft);
+    setCanvasY(canvas.offsetTop);
+
+    const handleMouseDown = (e) => {
+      const x = parseInt(e.clientX - canvasx);
+      const y = parseInt(e.clientY - canvasy);
+      setLastMouseX(x);
+      setMouseX(x);
+      setLastMouseY(y);
+      setMouseY(y);
+      setMouseDown(true);
+    };
+
+    const handleMouseUp = () => {
+      setMouseDown(false);
+    };
+
+    const handleMouseMove = (e) => {
+      const x = parseInt(e.clientX - canvasx);
+      const y = parseInt(e.clientY - canvasy);
+
+      if (mouseDown) {
+        ctx.beginPath();
+        if (toolType === 'draw') {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.strokeStyle = strokeColor;
+          ctx.lineWidth = brushSize;
+        } else {
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.lineWidth = brushSize;
+        }
+        ctx.moveTo(lastMouseX, lastMouseY);
+        ctx.lineTo(x, y);
+        ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.stroke();
+      }
+      setMouseX(x);
+      setMouseY(y);
+      setLastMouseX(x);
+      setLastMouseY(y);
+    };
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mouseup', handleMouseUp);
+    canvas.addEventListener('mousemove', handleMouseMove);
 
     return () => {
-      lineWidthInput.removeEventListener('input', handleLineWidthChange);
+      canvas.removeEventListener('mousedown', handleMouseDown);
+      canvas.removeEventListener('mouseup', handleMouseUp);
+      canvas.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [lineWidth]);
-
-  const init = () => {
-    canvas = canvasRef.current;
-    ctx = canvas.getContext('2d');
-    canvas.width = 800;
-    canvas.height = 800;
-
-    canvas.addEventListener('mousemove', (e) => findxy('move', e), false);
-    canvas.addEventListener('mousedown', (e) => findxy('down', e), false);
-    canvas.addEventListener('mouseup', (e) => findxy('up', e), false);
-    canvas.addEventListener('mouseout', (e) => findxy('out', e), false);
-  };
-
-  const color = (obj) => {
-    switch (obj.id) {
-      case 'green':
-        x = 'green';
-        break;
-      case 'blue':
-        x = 'blue';
-        break;
-      case 'red':
-        x = 'red';
-        break;
-      case 'yellow':
-        x = 'yellow';
-        break;
-      case 'orange':
-        x = 'orange';
-        break;
-      case 'black':
-        x = 'black';
-        break;
-      case 'white':
-        x = 'white';
-        break;
-    }
-  };
-
-  const draw = () => {
-      setIsDrawing(true);
-      ctx.beginPath();
-      ctx.moveTo(prevX, prevY);
-      ctx.lineTo(currX, currY);
-      ctx.strokeStyle = x;
-      ctx.lineWidth = lineWidth;
-      ctx.stroke();
-      ctx.closePath();
-      ctx.brushRadius = 12;
-      setIsCircling(false);
-      setIsRectangling(false);
-  };
-
-  const drawRectangle = () => {
-      setIsRectangling(true);
-      ctx.beginPath();
-      ctx.rect(prevX, prevY, currX, currY);
-      ctx.strokeStyle = x;
-      ctx.lineWidth = y;
-      ctx.stroke();
-      ctx.closePath();
-      setIsDrawing(false);
-      setIsCircling(false);
-  }
-
-  const drawCircle = () => {
-      setIsCircling(true);
-      ctx.beginPath();
-      ctx.arc(prevX, prevY, currX/2, 0, 2 * Math.PI );
-      ctx.strokeStyle = x;
-      ctx.lineWidth = y;
-      ctx.stroke();
-      ctx.closePath();
-      setIsDrawing(false);
-      setIsRectangling(false);
-  }
-
-  const clearAll = () => {
-    setIsDrawing(false);
-    setIsRectangling(false);
-    setIsCircling(false);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  };
-
-  const findxy = (res, e) => {
-    if (res === 'down') {
-      prevX = currX;
-      prevY = currY;
-      currX = e.clientX - canvas.offsetLeft;
-      currY = e.clientY - canvas.offsetTop;
-
-      flag = true;
-      dot_flag = true;
-      if (dot_flag) {
-        ctx.beginPath();
-        ctx.fillStyle = x;
-        ctx.fillRect(currX, currY, 2, 2);
-        ctx.closePath();
-        dot_flag = false;
-      }
-    }
-    if (res === 'up' || res === 'out') {
-      flag = false;
-    }
-    if (res === 'move') {
-      if (flag) {
-        prevX = currX;
-        prevY = currY;
-        currX = e.clientX - canvas.offsetLeft;
-        currY = e.clientY - canvas.offsetTop;
-        draw();
-      }
-    }
-  };
-
-  const handleLineWidthChange = (e) => {
-    setLineWidth(e.target.value);
-    draw();
-  };
-
-  const startDrawing = () => {
-    setIsDrawing(true);
-    setIsRectangling(false);
-    setIsCircling(false);
-  };
+  }, [canvasRef, canvasx, canvasy, mouseDown, lastMouseX, lastMouseY, mouseX, mouseY, toolType, brushSize, strokeColor]);
 
   return (
     <div>
-      <canvas ref={canvasRef} id="can" style={{ position: 'absolute', top: '1%', left: '1%', border: '2px solid' }}></canvas>
-      <div style={{ position: 'absolute', top: '2%', left: '85%' }}>Choose Color</div>
-      <div style={{ position: 'absolute', top: '5%', left: '87%', width: '15px', height: '15px', background: 'green', border: '2px solid' }} id="green" onClick={() => color(document.getElementById('green'))} ></div>
-      <div style={{ position: 'absolute', top: '5%', left: '90%', width: '15px', height: '15px', background: 'blue', border: '2px solid' }} id="blue" onClick={() => color(document.getElementById('blue'))} ></div>
-      <div style={{ position: 'absolute', top: '5%', left: '93%', width: '15px', height: '15px', background: 'red', border: '2px solid' }} id="red" onClick={() => color(document.getElementById('red'))} ></div>
-      <div style={{ position: 'absolute', top: '8%', left: '87%', width: '15px', height: '15px', background: 'yellow', border: '2px solid' }} id="yellow" onClick={() => color(document.getElementById('yellow'))} ></div>
-      <div style={{ position: 'absolute', top: '8%', left: '90%', width: '15px', height: '15px', background: 'orange', border: '2px solid' }} id="orange" onClick={() => color(document.getElementById('orange'))} ></div>
-      <div style={{ position: 'absolute', top: '8%', left: '93%', width: '15px', height: '15px', background: 'black', border: '2px solid' }} id="black" onClick={() => color(document.getElementById('black'))} ></div>
-      <div style={{ position: 'absolute', top: '11%', left: '85%' }}>Eraser</div>
-      <div style={{ position: 'absolute', top: '14%', left: '87%', width: '15px', height: '15px', background: 'white', border: '2px solid', }} id="white" onClick={() => color(document.getElementById('white'))} ></div>
-      <input type="button" value="Draw" onClick={startDrawing} style={{ position: 'absolute', top: '18%', left: '85%' }}></input>      
-      <input type="button" value="Rectangle" onClick={drawRectangle} style={{ position: 'absolute', top: '21%', left: '85%' }}></input>
-      <input type="button" value="Circle" onClick={drawCircle} style={{ position: 'absolute', top: '24%', left: '85%' }}></input>
-      <input type="button" value="Clear" onClick={clearAll} style={{ position: 'absolute', top: '27%', left: '85%' }} />
-      <input type="range" min="0" max="20" value={lineWidth} onChange={(e) => { setLineWidth(e.target.value); }} style={{ position: 'absolute', top: '1%', left: '2%' }} id='lineWidthInput' />
+      <canvas ref={canvasRef} id="canvas" width={800} height={800} style={{ border: '2px solid' }}></canvas>
+      <div>
+        <button onClick={() => handleUseTool('draw')}>Draw</button>
+        <button onClick={() => handleUseTool('erase')}>Erase</button>
+        <label>Brush Size:</label>
+        <input
+          type="range"
+          min="1"
+          max="50"
+          value={brushSize}
+          onChange={(e) => handleBrushSizeChange(parseInt(e.target.value))}
+        />
+        <label>Stroke Color:</label>
+        <input
+          type="color"
+          value={strokeColor}
+          onChange={(e) => handleColorChange(e.target.value)}
+        />
+      </div>
     </div>
   );
 };
