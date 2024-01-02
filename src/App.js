@@ -87,7 +87,7 @@ const App = () => {
       <div>
         <button onClick={() => handleUseTool('draw')}>Draw</button>
         <button onClick={() => handleUseTool('erase')}>Erase</button>
-        <label>Brush Size:</label>
+        <label>Size:</label>
         <input
           type="range"
           min="1"
@@ -95,7 +95,7 @@ const App = () => {
           value={brushSize}
           onChange={(e) => handleBrushSizeChange(parseInt(e.target.value))}
         />
-        <label>Stroke Color:</label>
+        <label>Color:</label>
         <input
           type="color"
           value={strokeColor}
