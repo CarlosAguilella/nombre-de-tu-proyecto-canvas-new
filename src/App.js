@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 const App = () => {
   const canvasRef = useRef(null);
+  const ctxRef = useRef(null);
   const [canvasx, setCanvasX] = useState(0);
   const [canvasy, setCanvasY] = useState(0);
   const [lastMouseX, setLastMouseX] = useState(0);
@@ -12,6 +13,7 @@ const App = () => {
   const [toolType, setToolType] = useState('draw');
   const [brushSize, setBrushSize] = useState(10);
   const [strokeColor, setStrokeColor] = useState('#000000');
+  const [backgroundColor, setBackgroundColor] = useState('#ffffff');
 
   const handleUseTool = useCallback((tool) => {
     setToolType(tool);
@@ -25,11 +27,18 @@ const App = () => {
     setStrokeColor(color);
   };
 
+  const handleBackgroundColorChange = (color) => {
+    setBackgroundColor(color);
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    setCanvasX(canvas.offsetLeft);
-    setCanvasY(canvas.offsetTop);
+    ctxRef.current = ctx;
+
+    const { left, top } = canvas.getBoundingClientRect();
+    setCanvasX(left);
+    setCanvasY(top);
 
     const handleMouseDown = (e) => {
       const x = parseInt(e.clientX - canvasx);
@@ -50,19 +59,19 @@ const App = () => {
       const y = parseInt(e.clientY - canvasy);
 
       if (mouseDown) {
-        ctx.beginPath();
+        ctxRef.current.beginPath();
         if (toolType === 'draw') {
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.strokeStyle = strokeColor;
-          ctx.lineWidth = brushSize;
+          ctxRef.current.globalCompositeOperation = 'source-over';
+          ctxRef.current.strokeStyle = strokeColor;
+          ctxRef.current.lineWidth = brushSize;
         } else {
-          ctx.globalCompositeOperation = 'destination-out';
-          ctx.lineWidth = brushSize;
+          ctxRef.current.globalCompositeOperation = 'destination-out';
+          ctxRef.current.lineWidth = brushSize;
         }
-        ctx.moveTo(lastMouseX, lastMouseY);
-        ctx.lineTo(x, y);
-        ctx.lineJoin = ctx.lineCap = 'round';
-        ctx.stroke();
+        ctxRef.current.moveTo(lastMouseX, lastMouseY);
+        ctxRef.current.lineTo(x, y);
+        ctxRef.current.lineJoin = ctxRef.current.lineCap = 'round';
+        ctxRef.current.stroke();
       }
       setMouseX(x);
       setMouseY(y);
@@ -79,11 +88,15 @@ const App = () => {
       canvas.removeEventListener('mouseup', handleMouseUp);
       canvas.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [canvasRef, canvasx, canvasy, mouseDown, lastMouseX, lastMouseY, mouseX, mouseY, toolType, brushSize, strokeColor]);
+  }, [canvasRef, canvasx, canvasy, ctxRef, lastMouseX, lastMouseY, mouseX, mouseY, toolType, brushSize, strokeColor]);
+
+  const handleClear = () => {
+    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+  };
 
   return (
     <div>
-      <canvas ref={canvasRef} id="canvas" width={800} height={800} style={{ border: '2px solid' }}></canvas>
+      <canvas ref={canvasRef} id="canvas" width={800} height={800} style={{ border: '5px solid', backgroundColor: backgroundColor }}></canvas>
       <div>
         <button onClick={() => handleUseTool('draw')}>Draw</button>
         <button onClick={() => handleUseTool('erase')}>Erase</button>
@@ -100,6 +113,17 @@ const App = () => {
           type="color"
           value={strokeColor}
           onChange={(e) => handleColorChange(e.target.value)}
+        />
+        <label>Background:</label>
+        <input
+          type="color"
+          value={backgroundColor}
+          onChange={(e) => handleBackgroundColorChange(e.target.value)}
+        />
+        <input
+          type="button"
+          value="Clear"
+          onClick={handleClear}
         />
       </div>
     </div>
