@@ -96,7 +96,7 @@ const App = () => {
 
   return (
     <div>
-      <canvas ref={canvasRef} id="canvas" width={800} height={800} style={{ border: '5px solid', backgroundColor: backgroundColor }}></canvas>
+      <canvas ref={canvasRef} id="canvas" width={800} height={800} style={{ border: '2px solid', backgroundColor: backgroundColor }}></canvas>
       <div>
         <button onClick={() => handleUseTool('draw')}>Draw</button>
         <button onClick={() => handleUseTool('erase')}>Erase</button>
