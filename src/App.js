@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 const App = () => {
   const canvasRef = useRef(null);
-  const ctxRef = useRef(canvasRef.current?.getContext('2d'));
+  const ctxRef = useRef(null);
   const [canvasx, setCanvasX] = useState(0);
   const [canvasy, setCanvasY] = useState(0);
   const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
@@ -11,22 +11,26 @@ const App = () => {
   const [brushSize, setBrushSize] = useState(10);
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
+  const [clear, setClear] = useState(false);
+  const [canvasLines, setCanvasLines] = useState([]);
+  const [canvasStyles, setCanvasStyles] = useState([]);
+  const [linesArray, setLinesArray] = useState([]);
 
   const handleUseTool = useCallback((tool) => {
     setToolType(tool);
   }, []);
 
-  const handleBrushSizeChange = (size) => {
+  const handleBrushSizeChange = useCallback((size) => {
     setBrushSize(size);
-  };
+  }, []);
 
-  const handleColorChange = (color) => {
+  const handleColorChange = useCallback((color) => {
     setStrokeColor(color);
-  };
+  }, []);
 
-  const handleBackgroundColorChange = (color) => {
+  const handleBackgroundColorChange = useCallback((color) => {
     setBackgroundColor(color);
-  };
+  }, []);
 
   const handleMouseDown = useCallback((e) => {
     const x = parseInt(e.clientX - canvasx);
@@ -44,22 +48,29 @@ const App = () => {
     const y = parseInt(e.clientY - canvasy);
 
     if (mouseDown) {
-      ctxRef.current.beginPath();
-      if (toolType === 'draw') {
-        ctxRef.current.globalCompositeOperation = 'source-over';
-        ctxRef.current.strokeStyle = strokeColor;
-        ctxRef.current.lineWidth = brushSize;
-      } else {
-        ctxRef.current.globalCompositeOperation = 'destination-out';
-        ctxRef.current.lineWidth = brushSize;
+      const updatedCanvasLines = [...canvasLines, { x, y }];
+      setCanvasLines(updatedCanvasLines);
+
+      const ctx = ctxRef.current;
+      if (ctx) {
+        ctx.beginPath();
+        if (toolType === 'draw') {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.strokeStyle = strokeColor;
+          ctx.lineWidth = brushSize;
+        } else {
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.lineWidth = brushSize;
+        }
+        ctx.moveTo(mouseCoordinates.x, mouseCoordinates.y);
+        ctx.lineTo(x, y);
+        ctx.lineJoin = ctx.lineCap = 'round';
+        ctx.stroke();
       }
-      ctxRef.current.moveTo(mouseCoordinates.x, mouseCoordinates.y);
-      ctxRef.current.lineTo(x, y);
-      ctxRef.current.lineJoin = ctxRef.current.lineCap = 'round';
-      ctxRef.current.stroke();
     }
+
     setMouseCoordinates({ x, y });
-  }, [canvasx, canvasy, mouseDown, toolType, brushSize, strokeColor, mouseCoordinates]);
+  }, [canvasx, canvasy, mouseDown, toolType, brushSize, strokeColor, mouseCoordinates, canvasLines]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -81,17 +92,54 @@ const App = () => {
     };
   }, [canvasRef, handleMouseDown, handleMouseUp, handleMouseMove]);
 
-  const handleClear = () => {
-    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-  };
+  useEffect(() => {
+    if (!mouseDown && canvasLines.length > 0) {
+      const updatedCanvasStyles = [...canvasStyles];
+      updatedCanvasStyles.push({ brushSize, strokeColor, backgroundColor, toolType });
+      setCanvasStyles(updatedCanvasStyles);
+      const updatedLinesArray = [...linesArray, brushSize, strokeColor, backgroundColor, toolType];
+      updatedLinesArray.push(...canvasLines); 
+      setLinesArray(updatedLinesArray);
+      setCanvasLines([]);
+    }
+  }, [mouseDown, canvasLines, canvasStyles, linesArray]);
+
+  const handleClear = useCallback(() => {
+    setClear(true);
+    const ctx = ctxRef.current;
+    if (ctx) {
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      setLinesArray([]);
+    }
+
+    if (clear) {
+      const cleared = {
+        clear,
+      };
+      const jsonClear = JSON.stringify(cleared);
+      console.log(jsonClear);
+    }
+    setClear(false);
+  }, [clear, canvasRef]);
+
+  const saveCanvasState = useCallback(() => {
+    if (!mouseDown) {
+      const jsonString = JSON.stringify(canvasLines);
+      setCanvasLines([]);
+      const jsonStyle = JSON.stringify(canvasStyles);
+      setCanvasStyles([]);
+      const jsonLinesArray = JSON.stringify(linesArray);
+      console.log(jsonLinesArray);
+    }
+  }, [mouseDown, canvasLines, canvasStyles, linesArray]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Arial, sans-serif' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Arial, sans-serif' }} onMouseMove={saveCanvasState}>
       <canvas
         ref={canvasRef}
         id="canvas"
         width={900}
-        height={800}
+        height={500}
         style={{
           border: '2px solid',
           backgroundColor: backgroundColor,
