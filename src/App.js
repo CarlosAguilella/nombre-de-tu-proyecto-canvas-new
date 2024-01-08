@@ -15,6 +15,8 @@ const App = () => {
   const [canvasLines, setCanvasLines] = useState([]);
   const [canvasStyles, setCanvasStyles] = useState([]);
   const [linesArray, setLinesArray] = useState([]);
+  const draw = "Draw:";
+  const erase = "Erase:";
 
   const handleUseTool = useCallback((tool) => {
     setToolType(tool);
@@ -46,11 +48,9 @@ const App = () => {
   const handleMouseMove = useCallback((e) => {
     const x = parseInt(e.clientX - canvasx);
     const y = parseInt(e.clientY - canvasy);
-
     if (mouseDown) {
       const updatedCanvasLines = [...canvasLines, { x, y }];
       setCanvasLines(updatedCanvasLines);
-
       const ctx = ctxRef.current;
       if (ctx) {
         ctx.beginPath();
@@ -68,7 +68,6 @@ const App = () => {
         ctx.stroke();
       }
     }
-
     setMouseCoordinates({ x, y });
   }, [canvasx, canvasy, mouseDown, toolType, brushSize, strokeColor, mouseCoordinates, canvasLines]);
 
@@ -76,15 +75,12 @@ const App = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     ctxRef.current = ctx;
-
     const { left, top } = canvas.getBoundingClientRect();
     setCanvasX(left);
     setCanvasY(top);
-
     canvas.addEventListener('mousedown', handleMouseDown);
     canvas.addEventListener('mouseup', handleMouseUp);
     canvas.addEventListener('mousemove', handleMouseMove);
-
     return () => {
       canvas.removeEventListener('mousedown', handleMouseDown);
       canvas.removeEventListener('mouseup', handleMouseUp);
@@ -93,12 +89,20 @@ const App = () => {
   }, [canvasRef, handleMouseDown, handleMouseUp, handleMouseMove]);
 
   useEffect(() => {
-    if (!mouseDown && canvasLines.length > 0) {
+    if (!mouseDown && canvasLines.length > 0 && toolType === 'draw') {
       const updatedCanvasStyles = [...canvasStyles];
-      updatedCanvasStyles.push({ brushSize, strokeColor, backgroundColor, toolType });
+      updatedCanvasStyles.push({ brushSize, strokeColor, backgroundColor });
       setCanvasStyles(updatedCanvasStyles);
-      const updatedLinesArray = [...linesArray, brushSize, strokeColor, backgroundColor, toolType];
-      updatedLinesArray.push(...canvasLines); 
+      const updatedLinesArray = [...linesArray, draw, brushSize, strokeColor, backgroundColor];
+      updatedLinesArray.push(...canvasLines);
+      setLinesArray(updatedLinesArray);
+      setCanvasLines([]);
+    } else if (!mouseDown && canvasLines.length > 0 && toolType === 'erase') {
+      const updatedCanvasStyles = [...canvasStyles];
+      updatedCanvasStyles.push({ brushSize, strokeColor, backgroundColor });
+      setCanvasStyles(updatedCanvasStyles);
+      const updatedLinesArray = [...linesArray, erase, brushSize, strokeColor, backgroundColor];
+      updatedLinesArray.push(...canvasLines);
       setLinesArray(updatedLinesArray);
       setCanvasLines([]);
     }
@@ -111,7 +115,6 @@ const App = () => {
       ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
       setLinesArray([]);
     }
-
     if (clear) {
       const cleared = {
         clear,
@@ -132,6 +135,18 @@ const App = () => {
       console.log(jsonLinesArray);
     }
   }, [mouseDown, canvasLines, canvasStyles, linesArray]);
+
+  const buttonStyle = {
+    padding: '8px 16px',
+    margin: '0 5px',
+    fontSize: '14px',
+    cursor: 'pointer',
+  };
+
+  const labelStyle = {
+    marginLeft: '10px',
+    fontSize: '14px',
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Arial, sans-serif' }} onMouseMove={saveCanvasState}>
@@ -180,18 +195,6 @@ const App = () => {
       </div>
     </div>
   );
-};
-
-const buttonStyle = {
-  padding: '8px 16px',
-  margin: '0 5px',
-  fontSize: '14px',
-  cursor: 'pointer',
-};
-
-const labelStyle = {
-  marginLeft: '10px',
-  fontSize: '14px',
 };
 
 export default App;
