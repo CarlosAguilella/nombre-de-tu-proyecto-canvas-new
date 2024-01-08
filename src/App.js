@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 const App = () => {
+
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   const [canvasx, setCanvasX] = useState(0);
@@ -17,6 +18,7 @@ const App = () => {
   const [linesArray, setLinesArray] = useState([]);
   const draw = "Draw:";
   const erase = "Erase:";
+  const backColor = "Background:";
 
   const handleUseTool = useCallback((tool) => {
     setToolType(tool);
@@ -91,9 +93,9 @@ const App = () => {
   useEffect(() => {
     if (!mouseDown && canvasLines.length > 0 && toolType === 'draw') {
       const updatedCanvasStyles = [...canvasStyles];
-      updatedCanvasStyles.push({ brushSize, strokeColor, backgroundColor });
+      updatedCanvasStyles.push({ brushSize, strokeColor });
       setCanvasStyles(updatedCanvasStyles);
-      const updatedLinesArray = [...linesArray, draw, brushSize, strokeColor, backgroundColor];
+      const updatedLinesArray = [...linesArray, draw, brushSize, strokeColor];
       updatedLinesArray.push(...canvasLines);
       setLinesArray(updatedLinesArray);
       setCanvasLines([]);
@@ -101,12 +103,19 @@ const App = () => {
       const updatedCanvasStyles = [...canvasStyles];
       updatedCanvasStyles.push({ brushSize, strokeColor, backgroundColor });
       setCanvasStyles(updatedCanvasStyles);
-      const updatedLinesArray = [...linesArray, erase, brushSize, strokeColor, backgroundColor];
+      const updatedLinesArray = [...linesArray, erase, brushSize];
       updatedLinesArray.push(...canvasLines);
       setLinesArray(updatedLinesArray);
       setCanvasLines([]);
     }
   }, [mouseDown, canvasLines, canvasStyles, linesArray]);
+
+  useEffect(() => {
+    if (backgroundColor.onChange) {
+      const updateCanvasBackground = [...backgroundColor];
+      updateCanvasBackground.push({ backColor, backgroundColor });
+    }
+  }, [backgroundColor, backColor])
 
   const handleClear = useCallback(() => {
     setClear(true);
@@ -131,6 +140,7 @@ const App = () => {
       setCanvasLines([]);
       const jsonStyle = JSON.stringify(canvasStyles);
       setCanvasStyles([]);
+      const jsonBackColor = JSON.stringify(backgroundColor);
       const jsonLinesArray = JSON.stringify(linesArray);
       console.log(jsonLinesArray);
     }
