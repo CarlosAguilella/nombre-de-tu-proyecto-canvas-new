@@ -132,13 +132,10 @@ const App = () => {
 
   const handleClear = useCallback(() => {
     setClear(true);
-
     const ctx = ctxRef.current;
-
     if (ctx) {
       ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     }
-
     setLinesArray([]);
     setEraseArray([]);
     setClear(false);
