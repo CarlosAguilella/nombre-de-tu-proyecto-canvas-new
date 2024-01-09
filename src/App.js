@@ -16,14 +16,11 @@ const App = () => {
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
 
   const [canvasLines, setCanvasLines] = useState([]);
-  const [canvasStyles, setCanvasStyles] = useState([]);
+  const [drawLines, setDrawLines] = useState([]);
+  const [eraseLines, setEraseLines] = useState([]);
   const [linesArray, setLinesArray] = useState([]);
   const [eraseArray, setEraseArray] = useState([]);
   const [clear, setClear] = useState(false);
-
-  const draw = "Draw:";
-  const erase = "Erase:";
-  const backColor = "BackgroundColor:"
 
   const handleUseTool = useCallback((tool) => {
     setToolType(tool);
@@ -50,16 +47,31 @@ const App = () => {
 
   const handleMouseUp = useCallback(() => {
     setMouseDown(false);
-  }, []);
+
+    if (canvasLines.length > 0) {
+      const updatedArray = toolType === 'draw' ? [...linesArray] : [...eraseArray];
+
+      updatedArray.push({
+        line: toolType === 'draw' ? [...canvasLines] : null,
+        erase: toolType === 'erase' ? [...canvasLines] : null,
+        props: { size: brushSize, color: strokeColor },
+      });
+
+      if (toolType === 'draw') {
+        setLinesArray(updatedArray);
+      } else {
+        setEraseArray(updatedArray);
+      }
+
+      setCanvasLines([]);
+    }
+  }, [canvasLines, linesArray, eraseArray, toolType, brushSize, strokeColor]);
 
   const handleMouseMove = useCallback((e) => {
     const x = parseInt(e.clientX - canvasx);
     const y = parseInt(e.clientY - canvasy);
 
     if (mouseDown) {
-      const updatedCanvasLines = [...canvasLines, { x, y }];
-      setCanvasLines(updatedCanvasLines);
-
       const ctx = ctxRef.current;
 
       if (ctx) {
@@ -79,10 +91,18 @@ const App = () => {
         ctx.lineJoin = ctx.lineCap = 'round';
         ctx.stroke();
       }
+
+      setCanvasLines([...canvasLines, { x, y }]);
+
+      if (toolType === 'draw') {
+        setDrawLines([...drawLines, { x, y }]);
+      } else {
+        setEraseLines([...eraseLines, { x, y }]);
+      }
     }
 
     setMouseCoordinates({ x, y });
-  }, [canvasx, canvasy, mouseDown, toolType, brushSize, strokeColor, mouseCoordinates, canvasLines]);
+  }, [canvasx, canvasy, mouseDown, toolType, brushSize, strokeColor, mouseCoordinates, canvasLines, drawLines, eraseLines]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -106,23 +126,9 @@ const App = () => {
 
   useEffect(() => {
     if (!mouseDown && canvasLines.length > 0) {
-      const updatedCanvasStyles = [canvasStyles];
-      const updatedArray = toolType === 'draw' ? [...linesArray] : [...eraseArray];
-
-      updatedCanvasStyles.push({ brushSize, strokeColor });
-      updatedArray.push(...canvasStyles, ...canvasLines);
-
-      setCanvasStyles(updatedCanvasStyles);
-
-      if (toolType === 'draw') {
-        setLinesArray(updatedArray);
-      } else {
-        setEraseArray(updatedArray);
-      }
-
       setCanvasLines([]);
     }
-  }, [mouseDown, canvasLines, canvasStyles, linesArray, eraseArray, toolType, brushSize, strokeColor]);
+  }, [mouseDown, canvasLines]);
 
   const handleClear = useCallback(() => {
     setClear(true);
@@ -139,25 +145,20 @@ const App = () => {
   }, [canvasRef]);
 
   const mostrarArrays = useCallback(() => {
-    console.log(draw);
-  
-    const drawLinesString = linesArray.map((line, index) => {
-      const props = canvasStyles[index] || {};
-      return `{x: ${line.x}, y: ${line.y}}` + (index < linesArray.length - 1 ? ', ' : '');
-    }).join('');
-  
-    console.log(`Line: ${drawLinesString}, Props: {brushSize: ${brushSize}, strokeColor: '${strokeColor}'}`);
-  
-    console.log(erase);
-  
-    const eraseLinesString = eraseArray.map((line, index) => {
-      const props = canvasStyles[index] || {};
-      return `{x: ${line.x}, y: ${line.y}}` + (index < eraseArray.length - 1 ? ', ' : '');
-    }).join('');
-  
-    console.log(`Line: ${eraseLinesString}, Props: {brushSize: ${brushSize}}`);
-  }, [eraseArray, linesArray, canvasStyles, brushSize, strokeColor]);
-  
+    const linesString = linesArray.map((lineSet, index) => {
+      const lineString = lineSet.line
+        ? `line: [${lineSet.line.map(point => `{ x: ${point.x}, y: ${point.y} }`).join(', ')}]`
+        : 'line: null';
+      const eraseString = lineSet.erase
+        ? `erase: [${lineSet.erase.map(point => `{ x: ${point.x}, y: ${point.y} }`).join(', ')}]`
+        : 'erase: null';
+      const props = lineSet.props || {};
+      return `MyLine: {\n  ${lineString},\n  ${eraseString},\n  props: {\n    size: ${props.size || brushSize},\n    color: '${props.color || strokeColor}'\n  }\n}`;
+    }).join(',\n');
+
+    console.log(`lines: [\n${linesString}\n]`);
+  }, [linesArray, brushSize, strokeColor]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Arial, sans-serif' }}>
       <canvas
@@ -209,7 +210,3 @@ const App = () => {
 };
 
 export default App;
-
-
-// Line: {x: , y: }
-// Props: {brushSize: , strokeColor: }
