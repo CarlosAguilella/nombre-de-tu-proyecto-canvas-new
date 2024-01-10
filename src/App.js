@@ -49,23 +49,28 @@ const App = () => {
     setMouseDown(false);
 
     if (canvasLines.length > 0) {
-      const updatedArray = toolType === 'draw' ? [...linesArray] : [...eraseArray];
+      const updatedArray = [...linesArray];
 
-      updatedArray.push({
-        line: toolType === 'draw' ? [...canvasLines] : null,
-        erase: toolType === 'erase' ? [...canvasLines] : null,
-        props: { size: brushSize, color: strokeColor },
-      });
+      if (toolType === 'draw' || toolType === 'erase') {
+        const newLineSet = {
+          line: toolType === 'draw' ? [...canvasLines] : null,
+          erase: toolType === 'erase' ? [...eraseLines] : null,
+          props: { size: brushSize, color: strokeColor },
+        };
 
-      if (toolType === 'draw') {
-        setLinesArray(updatedArray);
-      } else {
-        setEraseArray(updatedArray);
+        updatedArray.push(newLineSet);
+
+        if (toolType === 'draw') {
+          setLinesArray(updatedArray);
+        } else if (toolType === 'erase') {
+          setEraseArray(updatedArray);
+        }
       }
 
       setCanvasLines([]);
+      setEraseLines([]);
     }
-  }, [canvasLines, linesArray, eraseArray, toolType, brushSize, strokeColor]);
+  }, [canvasLines, eraseLines, linesArray, toolType, brushSize, strokeColor]);
 
   const handleMouseMove = useCallback((e) => {
     const x = parseInt(e.clientX - canvasx);
@@ -93,10 +98,9 @@ const App = () => {
       }
 
       setCanvasLines([...canvasLines, { x, y }]);
+      setDrawLines([...drawLines, { x, y }]);
 
-      if (toolType === 'draw') {
-        setDrawLines([...drawLines, { x, y }]);
-      } else {
+      if (toolType === 'erase') {
         setEraseLines([...eraseLines, { x, y }]);
       }
     }
@@ -142,7 +146,9 @@ const App = () => {
   }, [canvasRef]);
 
   const mostrarArrays = useCallback(() => {
-    const linesString = linesArray.map((lineSet, index) => {
+    const linesToDisplay = toolType === 'draw' ? linesArray : eraseArray;
+
+    const linesString = linesToDisplay.map((lineSet, index) => {
       const lineString = lineSet.line
         ? `line: [${lineSet.line.map(point => `{ x: ${point.x}, y: ${point.y} }`).join(', ')}]`
         : 'line: null';
@@ -154,7 +160,7 @@ const App = () => {
     }).join(',\n');
 
     console.log(`lines: [\n${linesString}\n]`);
-  }, [linesArray, brushSize, strokeColor]);
+  }, [toolType, linesArray, eraseArray, brushSize, strokeColor]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Arial, sans-serif' }}>
