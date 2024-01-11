@@ -49,24 +49,23 @@ const App = () => {
     setMouseDown(false);
 
     if (drawLines.length > 0 || eraseLines.length > 0) {
-      const updatedArray = [...linesArray];
-      if (toolType === 'draw' || toolType === 'erase') {
-        const newLineSet = {
-          line: toolType === 'draw' ? [...drawLines] : null,
-          erase: toolType === 'erase' ? [...eraseLines] : null,
-          props: { size: brushSize, color: strokeColor },
-        };
-        updatedArray.push(newLineSet);
-        if (toolType === 'draw') {
-          setLinesArray(updatedArray);
-        } else if (toolType === 'erase') {
-          setEraseArray(updatedArray);
-        }
+      let updatedArray = toolType === 'draw' ? [...linesArray] : [...eraseArray];
+
+      const newLineSet = {
+        line: toolType === 'draw' ? [...drawLines] : null,
+        erase: toolType === 'erase' ? [...eraseLines] : null,
+        props: { size: brushSize, color: strokeColor },
+      };
+
+      updatedArray.push(newLineSet);
+
+      if (toolType === 'draw') {
+        setLinesArray(updatedArray);
+      } else if (toolType === 'erase') {
+        setEraseArray(updatedArray);
       }
-      setDrawLines([]);
-      setEraseLines([]);
     }
-  }, [drawLines, eraseLines, linesArray, toolType, brushSize, strokeColor]);
+  }, [drawLines, eraseLines, linesArray, eraseArray, toolType, brushSize, strokeColor]);
 
   const handleMouseMove = useCallback((e) => {
     const x = parseInt(e.clientX - canvasx);
@@ -80,7 +79,7 @@ const App = () => {
           ctx.globalCompositeOperation = 'source-over';
           ctx.strokeStyle = strokeColor;
           ctx.lineWidth = brushSize;
-        } else {
+        } else if (toolType === 'erase') {
           ctx.globalCompositeOperation = 'destination-out';
           ctx.lineWidth = brushSize;
         }
@@ -121,6 +120,12 @@ const App = () => {
     }
   }, [mouseDown, drawLines]);
 
+  useEffect(() => {
+    if (!mouseDown && eraseLines.length > 0) {
+      setEraseLines([]);
+    }
+  }, [mouseDown, eraseLines]);
+
   const handleClear = useCallback(() => {
     setClear(true);
     const ctx = ctxRef.current;
@@ -136,15 +141,15 @@ const App = () => {
     const linesToDisplay = toolType === 'erase' ? eraseArray : linesArray;
     const linesString = linesToDisplay.map((lineSet, index) => {
       const lineString = lineSet.line
-        ? `line: [${lineSet.line.map(point => `{ x: ${point.x}, y: ${point.y} }`).join(', ')}]`
-        : 'line: null';
+        ? `"line": [${lineSet.line.map(point => `{ "x": ${point.x}, "y": ${point.y} }`).join(', ')}]`
+        : '"line": null';
       const eraseString = lineSet.erase
-        ? `erase: [${lineSet.erase.map(point => `{ x: ${point.x}, y: ${point.y} }`).join(', ')}]`
-        : 'erase: null';
+        ? `"erase": [${lineSet.erase.map(point => `{ "x": ${point.x}, "y": ${point.y} }`).join(', ')}]`
+        : '"erase": null';
       const props = lineSet.props || {};
-      return `MyLine: {\n  ${lineString},\n  ${eraseString},\n  props: {\n    size: ${props.size || brushSize},\n    color: '${props.color || strokeColor}'\n  }\n}`;
-    }).join(',\n');
-    console.log(`lines: [\n${linesString}\n]`);
+      return `{\n"MyLine": {\n  ${lineString},\n  ${eraseString},\n  "props": {\n    "size": ${props.size || brushSize},\n    "color": "${props.color || strokeColor}"\n  }\n}`;
+    }).join('},\n');
+    console.log(`{\n"lines": [\n${linesString}\n}\n]\n}`);
   }, [toolType, linesArray, eraseArray, brushSize, strokeColor]);
 
   return (
@@ -198,3 +203,43 @@ const App = () => {
 };
 
 export default App;
+
+
+
+
+
+/*
+
+Ejemplo: 
+
+
+
+{
+  "lines": [
+    {
+      "MyLine": {
+        "line": [{ "x": 279, "y": 25 }, { "x": 281, "y": 26 }, { "x": 286, "y": 26 }, { "x": 301, "y": 26 }, { "x": 327, "y": 26 }],
+        "erase": null,
+        "props": {
+          "size": 10,
+          "color": "#000000"
+        }
+      }
+    },
+    {
+      "MyLine": {
+        "line": [{ "x": 330, "y": 53 }, { "x": 332, "y": 53 }, { "x": 344, "y": 53 }, { "x": 361, "y": 56 }],
+        "erase": null,
+        "props": {
+          "size": 10,
+          "color": "#000000"
+        }
+      }
+    }
+  ]
+}
+
+
+
+
+  */
