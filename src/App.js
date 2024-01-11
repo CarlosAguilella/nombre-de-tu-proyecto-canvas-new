@@ -138,8 +138,18 @@ const App = () => {
         ? `"erase": [${lineSet.erase.map(point => `{ "x": ${point.x}, "y": ${point.y} }`).join(', ')}]`
         : '"erase": null';
       const props = lineSet.props || {};
-      return `{\n"MyLine": {\n  ${lineString},\n  ${eraseString},\n  "props": {\n    "size": ${props.size || brushSize},\n    "color": "${props.color || strokeColor}"\n  }\n}\n}`;
-    }).join(',\n');
+      return `{
+        "MyLine": {
+          ${lineString},
+          ${eraseString},
+          "props": {
+            "size": ${props.size || brushSize}
+            ${lineSet.erase ? '}' : `,"color": "${props.color || strokeColor}"}`
+            
+          }
+        }
+      }`;
+          }).join(',\n');
     console.log(`{\n"lines": [\n${linesString}\n]\n}`);
   }, [toolType, drawLines, eraseLines, brushSize, strokeColor, prueba]);
 
