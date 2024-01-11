@@ -33,6 +33,7 @@ const DrawingApp = () => {
         ctx.beginPath();
         ctx.strokeStyle = lineSet.MyLine.props.color || '#000000';
         ctx.lineWidth = lineSet.MyLine.props.size || 1;
+        ctx.lineJoin = ctx.lineCap = 'round';
         lineSet.MyLine.line.forEach((point, index) => {
           if (index === 0) {
             ctx.moveTo(point.x, point.y);
@@ -51,16 +52,16 @@ const DrawingApp = () => {
         placeholder="Insert JSON code here"
         value={inputCode}
         onChange={(e) => setInputCode(e.target.value)}
-        rows={35}
-        cols={125}
+        rows={20}
+        cols={20}
       />
       <button onClick={drawLinesOnCanvas}>Save JSON</button>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <button onClick={drawLines}>Show Lines</button>
       <canvas
         id="canvas"
-        width={900}
-        height={200}
+        width={800}
+        height={500}
         style={{
           border: '2px solid',
           margin: '10px',
