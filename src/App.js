@@ -11,7 +11,7 @@ const App = () => {
   const [mouseDown, setMouseDown] = useState(false);
 
   const [toolType, setToolType] = useState('draw');
-  const [brushSize, setBrushSize] = useState(50);
+  const [brushSize, setBrushSize] = useState(10);
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
 
@@ -145,7 +145,6 @@ const App = () => {
           "props": {
             "size": ${props.size || brushSize}
             ${lineSet.erase ? '}' : `,"color": "${props.color || strokeColor}"}`
-            
           }
         }
       }`;
