@@ -15,12 +15,10 @@ const App = () => {
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
 
-  const [linesArray, setLinesArray] = useState([]);
-  const [eraseArray, setEraseArray] = useState([]);
-  const [clear, setClear] = useState(false);
-
   const [drawLines, setDrawLines] = useState([]);
   const [eraseLines, setEraseLines] = useState([]);
+
+  const [prueba, setPrueba] = useState([]);
 
   const handleUseTool = useCallback((tool) => {
     setToolType(tool);
@@ -49,7 +47,7 @@ const App = () => {
     setMouseDown(false);
 
     if (drawLines.length > 0 || eraseLines.length > 0) {
-      let updatedArray = toolType === 'draw' ? [...linesArray] : [...eraseArray];
+      let updatedArray = [...prueba];
 
       const newLineSet = {
         line: toolType === 'draw' ? [...drawLines] : null,
@@ -59,13 +57,9 @@ const App = () => {
 
       updatedArray.push(newLineSet);
 
-      if (toolType === 'draw') {
-        setLinesArray(updatedArray);
-      } else if (toolType === 'erase') {
-        setEraseArray(updatedArray);
-      }
+      setPrueba(updatedArray);
     }
-  }, [drawLines, eraseLines, linesArray, eraseArray, toolType, brushSize, strokeColor]);
+  }, [drawLines, eraseLines, toolType, brushSize, strokeColor, prueba]);
 
   const handleMouseMove = useCallback((e) => {
     const x = parseInt(e.clientX - canvasx);
@@ -127,18 +121,15 @@ const App = () => {
   }, [mouseDown, eraseLines]);
 
   const handleClear = useCallback(() => {
-    setClear(true);
     const ctx = ctxRef.current;
     if (ctx) {
       ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     }
-    setLinesArray([]);
-    setEraseArray([]);
-    setClear(false);
+    setPrueba([]);
   }, [canvasRef]);
 
   const mostrarArrays = useCallback(() => {
-    const linesToDisplay = toolType === 'erase' ? eraseArray : linesArray;
+    const linesToDisplay = prueba;
     const linesString = linesToDisplay.map((lineSet, index) => {
       const lineString = lineSet.line
         ? `"line": [${lineSet.line.map(point => `{ "x": ${point.x}, "y": ${point.y} }`).join(', ')}]`
@@ -149,16 +140,16 @@ const App = () => {
       const props = lineSet.props || {};
       return `{\n"MyLine": {\n  ${lineString},\n  ${eraseString},\n  "props": {\n    "size": ${props.size || brushSize},\n    "color": "${props.color || strokeColor}"\n  }\n}`;
     }).join('},\n');
-    console.log(`{\n"lines": [\n${linesString}\n}\n]\n}`);
-  }, [toolType, linesArray, eraseArray, brushSize, strokeColor]);
+    console.log(`{\n"lines": [\n${linesString}\n]\n}`);
+  }, [toolType, drawLines, eraseLines, brushSize, strokeColor, prueba]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Arial, sans-serif' }}>
       <canvas
         ref={canvasRef}
         id="canvas"
-        width={400}
-        height={400}
+        width={800}
+        height={500}
         style={{
           border: '2px solid',
           backgroundColor: backgroundColor,
@@ -203,62 +194,3 @@ const App = () => {
 };
 
 export default App;
-
-
-
-
-
-/*
-
-Ejemplo: 
-
-
-
-{
-  "lines": [
-    {
-      "MyLine": {
-        "line": [{ "x": 279, "y": 25 }, { "x": 281, "y": 26 }, { "x": 286, "y": 26 }, { "x": 301, "y": 26 }, { "x": 327, "y": 26 }],
-        "erase": null,
-        "props": {
-          "size": 10,
-          "color": "#000000"
-        }
-      }
-    },
-    {
-      "MyLine": {
-        "line": [{ "x": 330, "y": 53 }, { "x": 332, "y": 53 }, { "x": 344, "y": 53 }, { "x": 361, "y": 56 }],
-        "erase": null,
-        "props": {
-          "size": 10,
-          "color": "#000000"
-        }
-      }
-    },
-    {
-      "MyLine": {
-        "line": null,
-        "erase": [{ "x": 216, "y": 105 }, { "x": 220, "y": 105 }, { "x": 320, "y": 105 }, { "x": 388, "y": 105 }, { "x": 452, "y": 103 }, { "x": 506, "y": 98 }, { "x": 510, "y": 96 }, { "x": 511, "y": 96 }],
-        "props": {
-          "size": 10,
-          "color": "#000000"
-        }
-      }},
-      {
-      "MyLine": {
-        "line": null,
-        "erase": [{ "x": 163, "y": 72 }, { "x": 197, "y": 72 }, { "x": 260, "y": 72 }, { "x": 306, "y": 72 }, { "x": 362, "y": 72 }, { "x": 426, "y": 72 }, { "x": 492, "y": 72 }, { "x": 550, "y": 72 }, { "x": 596, "y": 72 }, { "x": 620, "y": 72 }, { "x": 625, "y": 72 }, { "x": 626, "y": 72 }],
-        "props": {
-          "size": 10,
-          "color": "#000000"
-        }
-      }
-    }
-  ]
-}
-
-
-
-
-  */
