@@ -11,7 +11,7 @@ const App = () => {
   const [mouseDown, setMouseDown] = useState(false);
 
   const [toolType, setToolType] = useState('draw');
-  const [brushSize, setBrushSize] = useState(10);
+  const [brushSize, setBrushSize] = useState(50);
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
 
@@ -157,8 +157,8 @@ const App = () => {
       <canvas
         ref={canvasRef}
         id="canvas"
-        width={900}
-        height={200}
+        width={400}
+        height={400}
         style={{
           border: '2px solid',
           backgroundColor: backgroundColor,
@@ -230,6 +230,25 @@ Ejemplo:
       "MyLine": {
         "line": [{ "x": 330, "y": 53 }, { "x": 332, "y": 53 }, { "x": 344, "y": 53 }, { "x": 361, "y": 56 }],
         "erase": null,
+        "props": {
+          "size": 10,
+          "color": "#000000"
+        }
+      }
+    },
+    {
+      "MyLine": {
+        "line": null,
+        "erase": [{ "x": 216, "y": 105 }, { "x": 220, "y": 105 }, { "x": 320, "y": 105 }, { "x": 388, "y": 105 }, { "x": 452, "y": 103 }, { "x": 506, "y": 98 }, { "x": 510, "y": 96 }, { "x": 511, "y": 96 }],
+        "props": {
+          "size": 10,
+          "color": "#000000"
+        }
+      }},
+      {
+      "MyLine": {
+        "line": null,
+        "erase": [{ "x": 163, "y": 72 }, { "x": 197, "y": 72 }, { "x": 260, "y": 72 }, { "x": 306, "y": 72 }, { "x": 362, "y": 72 }, { "x": 426, "y": 72 }, { "x": 492, "y": 72 }, { "x": 550, "y": 72 }, { "x": 596, "y": 72 }, { "x": 620, "y": 72 }, { "x": 625, "y": 72 }, { "x": 626, "y": 72 }],
         "props": {
           "size": 10,
           "color": "#000000"
