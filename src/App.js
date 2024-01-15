@@ -37,8 +37,8 @@ const App = () => {
   }, []);
 
   const handleMouseDown = useCallback((e) => {
-    const x = parseInt(e.clientX - canvasx);
-    const y = parseInt(e.clientY - canvasy);
+    const x = parseFloat(e.clientX - canvasx);
+    const y = parseFloat(e.clientY - canvasy);
     setMouseCoordinates({ x, y });
     setMouseDown(true);
   }, [canvasx, canvasy]);
@@ -62,8 +62,8 @@ const App = () => {
   }, [drawLines, eraseLines, toolType, brushSize, strokeColor, prueba]);
 
   const handleMouseMove = useCallback((e) => {
-    const x = parseInt(e.clientX - canvasx);
-    const y = parseInt(e.clientY - canvasy);
+    const x = parseFloat(e.clientX - canvasx);
+    const y = parseFloat(e.clientY - canvasy);
 
     if (mouseDown) {
       const ctx = ctxRef.current;
@@ -157,8 +157,8 @@ const App = () => {
       <canvas
         ref={canvasRef}
         id="canvas"
-        width={800}
-        height={500}
+        width={3840}
+        height={2160}
         style={{
           border: '2px solid',
           backgroundColor: backgroundColor,
@@ -178,7 +178,7 @@ const App = () => {
           min="1"
           max="50"
           value={brushSize}
-          onChange={(e) => handleBrushSizeChange(parseInt(e.target.value))}
+          onChange={(e) => handleBrushSizeChange(parseFloat(e.target.value))}
           style={{ marginLeft: '5px' }}
         />
         <label style={{ marginLeft: '10px', fontSize: '14px' }}>Color:</label>
