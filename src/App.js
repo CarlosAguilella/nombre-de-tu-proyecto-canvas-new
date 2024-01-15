@@ -11,7 +11,9 @@ const App = () => {
   const [mouseDown, setMouseDown] = useState(false);
 
   const [toolType, setToolType] = useState('draw');
-  const [brushSize, setBrushSize] = useState(10);
+
+  const [brushSize, setBrushSize] = useState(50);
+  
   const [strokeColor, setStrokeColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#ffffff');
 
@@ -45,18 +47,14 @@ const App = () => {
 
   const handleMouseUp = useCallback(() => {
     setMouseDown(false);
-
     if (drawLines.length > 0 || eraseLines.length > 0) {
       let updatedArray = [...prueba];
-
       const newLineSet = {
         line: toolType === 'draw' ? [...drawLines] : null,
         erase: toolType === 'erase' ? [...eraseLines] : null,
         props: { size: brushSize, color: strokeColor },
       };
-
       updatedArray.push(newLineSet);
-
       setPrueba(updatedArray);
     }
   }, [drawLines, eraseLines, toolType, brushSize, strokeColor, prueba]);
@@ -64,7 +62,6 @@ const App = () => {
   const handleMouseMove = useCallback((e) => {
     const x = parseFloat(e.clientX - canvasx);
     const y = parseFloat(e.clientY - canvasy);
-
     if (mouseDown) {
       const ctx = ctxRef.current;
       if (ctx) {
@@ -132,10 +129,10 @@ const App = () => {
     const linesToDisplay = prueba;
     const linesString = linesToDisplay.map((lineSet, index) => {
       const lineString = lineSet.line
-        ? `"line": [${lineSet.line.map(point => `{ "x": ${point.x}, "y": ${point.y} }`).join(', ')}]`
+        ? `"line": [${lineSet.line.map(point => `{ "x": ${point.x.toFixed(5)}, "y": ${point.y.toFixed(5)} }`).join(', ')}]`
         : '"line": null';
       const eraseString = lineSet.erase
-        ? `"erase": [${lineSet.erase.map(point => `{ "x": ${point.x}, "y": ${point.y} }`).join(', ')}]`
+        ? `"erase": [${lineSet.erase.map(point => `{ "x": ${point.x.toFixed(5)}, "y": ${point.y.toFixed(5)} }`).join(', ')}]`
         : '"erase": null';
       const props = lineSet.props || {};
       return `{
@@ -148,9 +145,9 @@ const App = () => {
           }
         }
       }`;
-          }).join(',\n');
+    }).join(',\n');
     console.log(`{\n"lines": [\n${linesString}\n]\n}`);
-  }, [toolType, drawLines, eraseLines, brushSize, strokeColor, prueba]);
+  }, [brushSize, strokeColor, prueba]);  
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Arial, sans-serif' }}>
@@ -176,7 +173,7 @@ const App = () => {
         <input
           type="range"
           min="1"
-          max="50"
+          max="200"
           value={brushSize}
           onChange={(e) => handleBrushSizeChange(parseFloat(e.target.value))}
           style={{ marginLeft: '5px' }}
